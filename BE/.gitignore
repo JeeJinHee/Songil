@@ -1,0 +1,13 @@
+# BE(Python) 전용 규칙
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# 로컬 DB
+*.db
+*.sqlite3
