@@ -1,0 +1,28 @@
+# 환경 변수·비밀 정보 (API 키, DB 비밀번호)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE·에디터
+.idea/
+.vscode/
+*.swp
+
+# 키오스크 사진·영상 원본 → Google Drive에 두고 링크만 남긴다
+*.mp4
+*.mov
+*.avi
+*.heic
+data/raw/
+
+# AI 모델·가중치 파일
+*.tflite
+*.task
+*.pt
+*.pth
+*.onnx
+*.ckpt
