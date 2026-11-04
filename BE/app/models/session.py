@@ -18,10 +18,11 @@ class SessionStatus(str, enum.Enum):
 ENDED_STATUSES = {SessionStatus.COMPLETED, SessionStatus.CANCELLED, SessionStatus.FAILED}
 
 class CurrentStep(str, enum.Enum):
-    # TODO(D-01): 학교 키오스크 조사 후 실제 화면 순서로 확정
     ORDER_INPUT = "ORDER_INPUT"
+    CATEGORY_SELECT = "CATEGORY_SELECT"
     MENU_SELECT = "MENU_SELECT"
     OPTION_SELECT = "OPTION_SELECT"
+    QUANTITY_SELECT = "QUANTITY_SELECT"
     CART_CHECK = "CART_CHECK"
     DONE = "DONE"
 
