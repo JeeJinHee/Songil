@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api import sessions, stubs
+from app.api import goals, sessions, stubs
 from app.core.config import settings
 from app.core.logging import RequestLogMiddleware
 
@@ -12,6 +12,7 @@ app = FastAPI(title=settings.app_name, description="손길 — 시각장애인 �
 app.add_middleware(RequestLogMiddleware)
 
 app.include_router(sessions.router)
+app.include_router(goals.router)
 app.include_router(stubs.router)
 
 
