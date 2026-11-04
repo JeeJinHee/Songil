@@ -3,14 +3,10 @@ from datetime import datetime
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.db.base import Base
 from app.models.session import utcnow
 
-
 class Event(Base):
-    """공통 로그: 주요 상태 변화·오류 기록."""
-
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

@@ -1,16 +1,12 @@
-import enum
-import uuid
+import enum, uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum, Uuid
+from sqlalchemy import DateTime, Enum, Uuid, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.db.base import Base
-
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
-
 
 class SessionStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
@@ -19,9 +15,7 @@ class SessionStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
     FAILED = "FAILED"
 
-
 ENDED_STATUSES = {SessionStatus.COMPLETED, SessionStatus.CANCELLED, SessionStatus.FAILED}
-
 
 class CurrentStep(str, enum.Enum):
     # TODO(D-01): 학교 키오스크 조사 후 실제 화면 순서로 확정
@@ -31,12 +25,10 @@ class CurrentStep(str, enum.Enum):
     CART_CHECK = "CART_CHECK"
     DONE = "DONE"
 
-
 class EndReason(str, enum.Enum):
     CART_VERIFIED = "CART_VERIFIED"
     USER_CANCELLED = "USER_CANCELLED"
     ERROR = "ERROR"
-
 
 # 종료 사유 → 종료 후 Session 상태
 END_REASON_TO_STATUS = {
@@ -44,7 +36,6 @@ END_REASON_TO_STATUS = {
     EndReason.USER_CANCELLED: SessionStatus.CANCELLED,
     EndReason.ERROR: SessionStatus.FAILED,
 }
-
 
 class OrderSession(Base):
     __tablename__ = "sessions"
@@ -61,3 +52,5 @@ class OrderSession(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    last_screen_seq: Mapped[int | None] = mapped_column(Integer, nullable=True)
