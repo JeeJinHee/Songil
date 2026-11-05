@@ -6,10 +6,7 @@ router = APIRouter(prefix="/api/sessions/{sessionId}")
 def not_implemented():
     raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, "아직 구현되지 않은 API입니다.")
 
-# BE-03 주문 진행 관리 — 명세는 키오스크 조사(D-01)·데이터 계약(D-08) 후 확정
-@router.post("/selection-result", tags=["BE-03 주문 진행"], summary="BE-03-02 선택 결과 확인·상태 갱신")
-def check_selection_result(sessionId: uuid.UUID):
-    not_implemented()
+# BE-03 주문 진행 관리
 
 
 # BE-04 오류·복구 관리
