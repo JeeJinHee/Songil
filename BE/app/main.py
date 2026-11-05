@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api import goals, sessions, stubs
+from app.api import goals, sessions, stubs, guide
 from app.core.config import settings
 from app.core.logging import RequestLogMiddleware
 
@@ -14,7 +14,7 @@ app.add_middleware(RequestLogMiddleware)
 app.include_router(sessions.router)
 app.include_router(goals.router)
 app.include_router(stubs.router)
-
+app.include_router(guide.router)
 
 @app.get("/health", tags=["공통"], summary="서버 상태 확인")
 def health():
