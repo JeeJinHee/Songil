@@ -1,5 +1,3 @@
-"""BE-01 Session 관리"""
-
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,16 +15,13 @@ router = APIRouter(prefix="/api/sessions", tags=["BE-01 Session 관리"])
     "",
     response_model=SessionResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="BE-01-01 Session 생성",
 )
 def create_session(db: Session = Depends(get_db)):
     return session_service.create_session(db)
 
-
 @router.get(
     "/{sessionId}",
     response_model=SessionResponse,
-    summary="BE-01-02 Session 조회",
     responses={404: {"description": "Session이 존재하지 않음"}},
 )
 def get_session(sessionId: uuid.UUID, db: Session = Depends(get_db)):
@@ -35,11 +30,9 @@ def get_session(sessionId: uuid.UUID, db: Session = Depends(get_db)):
     except SessionNotFound:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Session이 존재하지 않습니다.")
 
-
 @router.post(
     "/{sessionId}/end",
     response_model=SessionEndResponse,
-    summary="BE-01-03 Session 종료",
     responses={
         404: {"description": "Session이 존재하지 않음"},
         409: {"description": "이미 종료된 Session"},
