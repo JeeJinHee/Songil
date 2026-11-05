@@ -6,15 +6,19 @@ from sqlalchemy import select
 from app.models import GuideStep
 from app.models.goal import GoalStatus
 from app.models.session import ENDED_STATUSES, CurrentStep
-from app.schemas.guide import Button, NextTargetRequest, NextTargetResponse, NextTargetResult, Target
+from app.schemas.guide import (Button, NextTargetRequest, NextTargetResponse, NextTargetResult, Target, SelectionResultResponse, SelectionResultRequest)
 from app.services.goal_service import _find_goal
 from app.services.session_service import SessionAlreadyEnded, get_session, log_event
 
 from app.services.screen_matcher import match_choice, normalize, split_temperature, temperature_of, group_name, is_required
+from app.models.guide import SelectionResult
 
+# 예외처리
 class GoalNotConfirmed(Exception):
     pass
 class StaleScreen(Exception):
+    pass
+class NoGuidedStep(Exception):
     pass
 
 def _reply(order_session, request, result, message, choices=None) -> NextTargetResponse:
@@ -188,3 +192,63 @@ def decide_next_target(db: Session, session_id: uuid.UUID, request: NextTargetRe
     log_event(db, session_id, "NEXT_TARGET", {"screenSeq": request.screen_seq, "result": response.result.value})
     db.commit()
     return response
+
+######
+
+# 가장 마지막으로 안내한 버튼
+def _last_step(db, session_id) -> GuideStep | None:
+    return db.scalars(
+        select(GuideStep).where(GuideStep.session_id == session_id).order_by(GuideStep.id.desc())
+    ).first()
+
+# 눌렀는지 판단
+def _judge(goal, step, request) -> SelectionResult:
+    # 메뉴 버튼: 옵션 팝업이 떴거나 장바구니에 담겼으면 성공
+    if step.step == CurrentStep.MENU_SELECT and step.target_text != "다음":
+        if _is_option_popup(request.buttons) or _cart_quantity(goal, request.cart_rows) > 0:
+            return SelectionResult.SUCCESS
+        if request.screen_changed:
+            return SelectionResult.WRONG_SELECTION
+        return SelectionResult.UNCONFIRMED
+    
+    # 그 외 버튼: 화면이 바뀌면 성공
+    if request.screen_changed:
+        return SelectionResult.SUCCESS
+    return SelectionResult.UNCONFIRMED
+
+MESSAGES = {
+    SelectionResult.SUCCESS: "{text}을(를) 눌렀어요.",
+    SelectionResult.WRONG_SELECTION: "다른 버튼이 눌린 것 같아요. 화면을 다시 확인할게요.",
+    SelectionResult.UNCONFIRMED: "눌렸는지 확인하지 못했어요. 다음으로 넘어갈게요.",
+}
+
+def check_selection_result(db: Session, session_id: uuid.UUID, request: SelectionResultRequest) -> SelectionResultResponse:
+    # 끝난 세션인지 확인
+    order_session = get_session(db, session_id)
+    if order_session.status in ENDED_STATUSES:
+        raise SessionAlreadyEnded
+    # 늦게 도착한 옛날 화면이면 무시하기
+    last = order_session.last_screen_seq
+    if last is not None and request.screen_seq < last:
+        raise StaleScreen
+    order_session.last_screen_seq = request.screen_seq
+
+    # 안내한 버튼이 맞는지 확인
+    step = _last_step(db, session_id)
+    if step is None or step.target_button_id != request.target_button_id:
+        raise NoGuidedStep
+
+    goal = _find_goal(db, session_id)
+    result = _judge(goal, step, request)
+    step.result = result
+
+    log_event(db, session_id, "SELECTION_RESULT", {"screenSeq": request.screen_seq, "result": result.value})
+    db.commit()
+    return SelectionResultResponse(
+        result=result,
+        current_step=order_session.current_step,
+        message=MESSAGES[result].format(text=step.target_text),
+    )
+
+
+
