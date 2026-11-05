@@ -66,7 +66,7 @@ def test_end_session_not_found(client):
 
 def test_stub_returns_501(client):
     created = create_session(client)
-    response = client.post(f"/api/sessions/{created['sessionId']}/selection-result")
+    response = client.post(f"/api/sessions/{created['sessionId']}/errors")
     assert response.status_code == 501
 
 def test_datetimes_have_timezone(client):
