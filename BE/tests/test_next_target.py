@@ -11,6 +11,10 @@ POPUP = [
     {"buttonId": "o3", "text": "샷추가 +500", "group": "샷(선택)"},
     {"buttonId": "ok", "text": "선택완료"},
 ]
+TABS = [
+    {"buttonId": "t1", "text": "이화김밥", "group": "카테고리"},
+    {"buttonId": "t2", "text": "COFFEE", "group": "카테고리"},
+]
 
 # 목표를 확정한 세션을 만들고 next-target 주소를 돌려줌
 def confirmed_url(client, text="아메리카노 두 잔"):
@@ -117,3 +121,34 @@ def test_ended_session(client):
     session_url = url.replace("/next-target", "")
     client.post(f"{session_url}/end", json={"endReason": "USER_CANCELLED"})
     assert client.post(url, json=screen(1, MENU)).status_code == 409
+
+
+# 메뉴도 다음 ▶도 없으면 안 본 탭을 차례로 안내
+def test_tabs_in_order(client):
+    url = confirmed_url(client, "카페라떼")
+    first = client.post(url, json=screen(1, TABS)).json()
+    assert first["target"]["text"] == "이화김밥"
+    assert first["currentStep"] == "CATEGORY_SELECT"
+
+    second = client.post(url, json=screen(2, TABS)).json()
+    assert second["target"]["text"] == "COFFEE"          # 이화김밥은 이미 봤으니까
+
+# 탭을 다 봤는데도 없으면 NOT_FOUND
+def test_all_tabs_seen(client):
+    url = confirmed_url(client, "카페라떼")
+    client.post(url, json=screen(1, TABS))
+    client.post(url, json=screen(2, TABS))
+    body = client.post(url, json=screen(3, TABS)).json()
+    assert body["result"] == "NOT_FOUND"
+
+# 다음 ▶를 3번 넘기면 탭으로 넘어감
+def test_page_limit_then_tab(client):
+    url = confirmed_url(client, "카페라떼")
+    for seq in range(1, 4):
+        body = client.post(url, json=screen(seq, MENU + TABS)).json()
+        assert body["currentStep"] == "PAGE_NEXT"
+    body = client.post(url, json=screen(4, MENU + TABS)).json()
+    assert body["currentStep"] == "CATEGORY_SELECT"
+    assert body["target"]["text"] == "이화김밥"
+
+    

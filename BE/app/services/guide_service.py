@@ -108,12 +108,22 @@ def _decide_on_main(db, order_session, goal, request) -> NextTargetResponse:
     if len(found) > 1:
         order_session.current_step = CurrentStep.MENU_SELECT
         return _reply(order_session, request, NextTargetResult.NEED_CHOICE, "아이스와 따뜻한 중 어떤 걸로 할까요?", choices=[b.text for b in found])   # 버튼 글자 목록
-    
-    # 3. 다음 페이지 / 못 찾음
-    for b in request.buttons:
-        if "다음" in b.text:
-            return _target(db, order_session, request, b, CurrentStep.PAGE_NEXT, "이 화면에 없어서 다음 페이지로 넘기겠습니다.")
-        
+
+    # 3. 메뉴가 없을 때
+    tabs_seen, pages = _browse_history(db, order_session.id)
+    # 3-1. (사전 힌트: kiosk_menu.json 받은 뒤 추가)
+
+    # 3-2. 이 탭에서 아직 덜 넘겼으면 다음 페이지
+    if pages < MAX_PAGES:
+        for b in request.buttons:
+            if "다음" in b.text:
+                return _target(db, order_session, request, b, CurrentStep.PAGE_NEXT, "이 화면에 없어서 다음 페이지로 넘기겠습니다.")
+
+    # 3-3. 아직 안 본 탭
+    for tab in _tab_buttons(request.buttons):
+        if tab.text not in tabs_seen:
+            return _target(db, order_session, request, tab, CurrentStep.CATEGORY_SELECT, f"{tab.text} 탭을 누르세요.")
+    # 3-4. 다 봤는데 없음
     return _reply(order_session, request, NextTargetResult.NOT_FOUND, "이 화면에서 메뉴를 못 찾았어요. 다른 카테고리 탭을 눌러주세요. ")
 
 # 메뉴를 고른 뒤에 이미 안내한 옵션 묶음들
@@ -251,5 +261,25 @@ def check_selection_result(db: Session, session_id: uuid.UUID, request: Selectio
         message=MESSAGES[result].format(text=step.target_text),
     )
 
+TAB_GROUP = "카테고리"
+MAX_PAGES = 3
+# 화면 버튼 중 카테고리 탭만
+def _tab_buttons(buttons) -> list[Button]:
+    return [b for b in buttons if b.group == TAB_GROUP]
 
+# 지금까지 안내한 탭들과, 마지막 탭에서 다음 ▶를 몇 번 눌렀는지
+def _browse_history(db, session_id) -> tuple[set[str], int]:
+    steps = db.scalars(
+        select(GuideStep).where(GuideStep.session_id == session_id).order_by(GuideStep.id)
+    ).all()
+
+    tabs = set()
+    pages = 0
+    for s in steps:
+        if s.step == CurrentStep.CATEGORY_SELECT:
+            tabs.add(s.target_text)
+            pages = 0                       # 탭을 옮기면 다시 1페이지
+        elif s.step == CurrentStep.PAGE_NEXT:
+            pages += 1
+    return tabs, pages
 

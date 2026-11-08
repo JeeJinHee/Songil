@@ -12,11 +12,17 @@ class NextTargetResult(str, enum.Enum):
     NOT_FOUND = "NOT_FOUND"
     DONE = "DONE"
 
+class BBox(CamelModel):
+    x: float = Field(ge=0, le=1)
+    y: float = Field(ge=0, le=1)
+    w: float = Field(ge=0, le=1)
+    h: float = Field(ge=0, le=1)
 class Button(CamelModel):
     button_id: str
     text: str
     group: str | None = None
     sold_out: bool = False
+    bbox: BBox | None = None
 
 class CartRow(CamelModel):
     texts: list[str]
