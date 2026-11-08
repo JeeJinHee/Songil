@@ -112,7 +112,8 @@ def _decide_on_main(db, order_session, goal, request) -> NextTargetResponse:
     # 3. 다음 페이지 / 못 찾음
     for b in request.buttons:
         if "다음" in b.text:
-            return _target(db, order_session, request, b, CurrentStep.MENU_SELECT, "이 화면에 없어서 다음 페이지로 넘겨 볼게요.")
+            return _target(db, order_session, request, b, CurrentStep.PAGE_NEXT, "이 화면에 없어서 다음 페이지로 넘기겠습니다.")
+        
     return _reply(order_session, request, NextTargetResult.NOT_FOUND, "이 화면에서 메뉴를 못 찾았어요. 다른 카테고리 탭을 눌러주세요. ")
 
 # 메뉴를 고른 뒤에 이미 안내한 옵션 묶음들
@@ -152,7 +153,7 @@ def _decide_on_popup(db, order_session, goal, request) -> NextTargetResponse:
             if chosen is None:
                 order_session.current_step = CurrentStep.OPTION_SELECT
                 return _reply(order_session, request, NextTargetResult.NEED_CHOICE, f"{key}을 골라 주세요.", choices=texts) 
-
+            
             goal.options = {**goal.options, key:chosen}
         # 고릅 값에 맞는 버튼 안내
         picked = match_choice(goal.options[key], texts)
@@ -204,7 +205,7 @@ def _last_step(db, session_id) -> GuideStep | None:
 # 눌렀는지 판단
 def _judge(goal, step, request) -> SelectionResult:
     # 메뉴 버튼: 옵션 팝업이 떴거나 장바구니에 담겼으면 성공
-    if step.step == CurrentStep.MENU_SELECT and step.target_text != "다음":
+    if step.step == CurrentStep.MENU_SELECT:
         if _is_option_popup(request.buttons) or _cart_quantity(goal, request.cart_rows) > 0:
             return SelectionResult.SUCCESS
         if request.screen_changed:
