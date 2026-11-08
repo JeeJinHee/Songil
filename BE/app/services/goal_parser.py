@@ -16,12 +16,16 @@ def parse_goal(text: str) -> Goal | None:
 
     options: dict[str, str] = {}
     menu_words: list[str] = []
-    for word in text.split():
-        if word in TEMPERATURE_WORDS:
-            options["온도"] = TEMPERATURE_WORDS[word]
-        else:
-            menu_words.append(word)
 
+    for word in text.split():
+        for temp_word, temp in TEMPERATURE_WORDS.items():
+            if word.startswith(temp_word):
+                options["온도"] = temp
+                word = word[len(temp_word):]
+                break
+        if word:
+            menu_words.append(word)
+        
     if not menu_words:
         return None
     return Goal(menu=" ".join(menu_words), options=options, quantity=quantity)

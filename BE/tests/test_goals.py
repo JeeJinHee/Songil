@@ -91,3 +91,11 @@ def test_goal_after_session_ended_conflict(client):
     url = goal_url(client)
     client.post(url.removesuffix("/goal") + "/end", json={"endReason": "USER_CANCELLED"})
     assert client.post(url, json={"text": "아메리카노"}).status_code == 409
+
+# 온도를 붙여 말해도 온도와 메뉴를 나눔
+def test_temperature_attached(client):
+    for text, temp in [("아이스아메리카노", "아이스"), ("핫아메리카노", "따뜻한"), ("아이스 아메리카노", "아이스")]:
+        url = goal_url(client)
+        body = client.post(url, json={"text": text}).json()
+        assert body["goal"]["menu"] == "아메리카노"
+        assert body["goal"]["options"] == {"온도": temp}

@@ -67,3 +67,15 @@ def test_stale_screen(client):
 def test_unknown_session(client):
     url = f"/api/sessions/{uuid.uuid4()}/selection-result"
     assert client.post(url, json=pressed(1, "m1", True, POPUP)).status_code == 404
+
+# 다음 버튼을 눌러 페이지가 넘어가면 성공
+def test_next_page_success(client):
+    next_url = confirmed_url(client, "카페라떼")
+    target = client.post(next_url, json=screen(1, MENU)).json()
+    assert target["currentStep"] == "PAGE_NEXT"
+
+    url = next_url.replace("next-target", "selection-result")
+    page2 = [{"buttonId": "x1", "text": "(핫) 카페라떼"}]
+    body = client.post(url, json=pressed(2, "n1", True, page2)).json()
+    assert body["result"] == "SUCCESS"
+
