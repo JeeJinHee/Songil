@@ -10,8 +10,9 @@ from app.schemas.guide import (Button, NextTargetRequest, NextTargetResponse, Ne
 from app.services.goal_service import _find_goal
 from app.services.session_service import SessionAlreadyEnded, get_session, log_event
 
-from app.services.screen_matcher import match_choice, normalize, split_temperature, temperature_of, group_name, is_required
+from app.services.screen_matcher import match_choice, normalize, split_temperature, temperature_of, group_name, is_required, spoken
 from app.models.guide import SelectionResult
+from app.services.menu_dict import category_of, pages_of
 
 # 예외처리
 class GoalNotConfirmed(Exception):
@@ -30,7 +31,7 @@ def _reply(order_session, request, result, message, choices=None) -> NextTargetR
         message=message,
     )
 
-def _target(db, order_session, request, button: Button, step: CurrentStep, message=None) -> NextTargetResponse:
+def _target(db, order_session, request, button: Button, step: CurrentStep, message=None, source="rule", reason=None) -> NextTargetResponse:
     db.add(GuideStep(
         session_id=order_session.id,
         screen_seq=request.screen_seq,
@@ -45,7 +46,9 @@ def _target(db, order_session, request, button: Button, step: CurrentStep, messa
         result=NextTargetResult.TARGET,
         target=Target(button_id=button.button_id, text=button.text),
         current_step=step,
-        message=message or f"{button.text} 버튼을 누르세요.",
+        message=message or f"{spoken(button.text)} 버튼을 누르세요.",
+        source=source,
+        reason=reason,
     )
 
 def _is_option_popup(buttons: list[Button]) -> bool:
@@ -72,7 +75,7 @@ def _find_menu_buttons(goal, buttons) -> list[Button]:
     want = temperature_of(goal.options.get("온도", ""))
     found = []
     for b in buttons:
-        if b.group: continue
+        if b.group or b.type == "tab": continue
         temp, name = split_temperature(b.text)
         if name != menu: continue
         if want and temp and temp != want: continue
@@ -103,18 +106,40 @@ def _decide_on_main(db, order_session, goal, request) -> NextTargetResponse:
         button = found[0]                   # 첫번째 버튼
         # 품절이라면
         if button.sold_out:                 # AI가 "일시품절"이 붙은 메뉴를 True로 보내줌
-            return _reply(order_session, request, NextTargetResult.SOLD_OUT, f"{button.text}는 지금 품절이에요.")
+            return _reply(order_session, request, NextTargetResult.SOLD_OUT, f"{spoken(button.text)}는 지금 품절이에요.")
         return _target(db, order_session, request, button, CurrentStep.MENU_SELECT)
     if len(found) > 1:
         order_session.current_step = CurrentStep.MENU_SELECT
         return _reply(order_session, request, NextTargetResult.NEED_CHOICE, "아이스와 따뜻한 중 어떤 걸로 할까요?", choices=[b.text for b in found])   # 버튼 글자 목록
-    
-    # 3. 다음 페이지 / 못 찾음
-    for b in request.buttons:
-        if "다음" in b.text:
-            return _target(db, order_session, request, b, CurrentStep.PAGE_NEXT, "이 화면에 없어서 다음 페이지로 넘기겠습니다.")
-        
+
+     # 3. 메뉴가 없을 때
+    tabs_seen, pages, last_tab = _browse_history(db, order_session.id)
+    # 3-1. 사전 힌트: 목표 메뉴의 카테고리 탭
+    category = category_of(goal.menu)
+    if category:
+        for tab in _tab_buttons(request.buttons):
+            if normalize(tab.text) == normalize(category) and tab.text not in tabs_seen:
+                return _target(db, order_session, request, tab, CurrentStep.CATEGORY_SELECT, f"{tab.text} 탭을 누르세요.",
+                               source="fallback", reason=f"메뉴 사전에서 {goal.menu}는 {category} 탭에 있음")
+
+    # 3-2. 이 탭에서 아직 덜 넘겼으면 다음 페이지 (사전에 페이지 수가 있으면 그만큼만)
+    limit = MAX_PAGES
+    if last_tab and pages_of(last_tab):
+        limit = pages_of(last_tab) - 1
+    if pages < limit:
+        for b in request.buttons:
+            if "다음" in b.text:
+                return _target(db, order_session, request, b, CurrentStep.PAGE_NEXT, "이 화면에 없어서 다음 페이지로 넘기겠습니다.",
+                               source="fallback", reason="이 화면에 메뉴가 없어서 다음 페이지 확인")
+
+    # 3-3. 아직 안 본 탭
+    for tab in _tab_buttons(request.buttons):
+        if tab.text not in tabs_seen:
+            return _target(db, order_session, request, tab, CurrentStep.CATEGORY_SELECT, f"{tab.text} 탭을 누르세요.",
+                           source="fallback", reason="아직 안 본 탭을 차례로 확인")
+    # 3-4. 다 봤는데 없음
     return _reply(order_session, request, NextTargetResult.NOT_FOUND, "이 화면에서 메뉴를 못 찾았어요. 다른 카테고리 탭을 눌러주세요. ")
+
 
 # 메뉴를 고른 뒤에 이미 안내한 옵션 묶음들
 def _guided_groups(db, session_id) -> set[str]:
@@ -248,8 +273,29 @@ def check_selection_result(db: Session, session_id: uuid.UUID, request: Selectio
     return SelectionResultResponse(
         result=result,
         current_step=order_session.current_step,
-        message=MESSAGES[result].format(text=step.target_text),
+        message=MESSAGES[result].format(text=spoken(step.target_text)),
     )
 
+MAX_PAGES = 3
+# 화면 버튼 중 카테고리 탭만
+def _tab_buttons(buttons) -> list[Button]:
+    return [b for b in buttons if b.type == "tab"]
 
+# 지금까지 안내한 탭들, 마지막 탭에서 다음 ▶를 몇 번 눌렀는지, 마지막 탭 이름
+def _browse_history(db, session_id) -> tuple[set[str], int, str | None]:
+    steps = db.scalars(
+        select(GuideStep).where(GuideStep.session_id == session_id).order_by(GuideStep.id)
+    ).all()
+
+    tabs = set()
+    pages = 0
+    last_tab = None
+    for s in steps:
+        if s.step == CurrentStep.CATEGORY_SELECT:
+            tabs.add(s.target_text)
+            last_tab = s.target_text
+            pages = 0                       # 탭을 옮기면 다시 1페이지
+        elif s.step == CurrentStep.PAGE_NEXT:
+            pages += 1
+    return tabs, pages, last_tab
 

@@ -15,8 +15,10 @@ class NextTargetResult(str, enum.Enum):
 class Button(CamelModel):
     button_id: str
     text: str
+    type: str | None = None         # "tab"/"menu"/"etc"/없음
     group: str | None = None
     sold_out: bool = False
+    bbox: list[float] | None = None         # [x1, y1, x2, y2]
 
 class CartRow(CamelModel):
     texts: list[str]
@@ -40,7 +42,8 @@ class NextTargetResponse(CamelModel):
     choices: list[str] | None = None
     current_step: CurrentStep
     message: str
-
+    source: str | None=None
+    reason: str | None=None
 
 class SelectionResultRequest(CamelModel):
     target_button_id: str
