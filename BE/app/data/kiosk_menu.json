@@ -1,0 +1,639 @@
+{
+  "_설명": "손길 테스트용 키오스크(이화상점 공학관카페) 메뉴·옵션 구조 (2026-11-09 기준). name = 온도 표시를 뺀 기본 이름, buttons = 화면 버튼 글자 그대로, template = 옵션 팝업 종류.",
+  "_사용처": {
+    "AI": "OCR 글자를 메뉴 사전으로 보정 (menu_dict.py). 옵션 버튼에 group, 품절 메뉴에 soldOut 붙이기",
+    "BE": "next-target 예비 규칙: 목표 메뉴(name) → category → 그 이름의 탭 버튼"
+  },
+  "temperature_marks": {
+    "아이스": [
+      "(아)",
+      "(아이스)"
+    ],
+    "따뜻한": [
+      "(핫)"
+    ]
+  },
+  "categories": [
+    {
+      "name": "이화김밥",
+      "aliases": [
+        "김밥",
+        "주먹밥"
+      ],
+      "pages": 1
+    },
+    {
+      "name": "이화과자",
+      "aliases": [
+        "과자",
+        "디저트",
+        "빵"
+      ],
+      "pages": 1
+    },
+    {
+      "name": "세트",
+      "aliases": [
+        "세트메뉴"
+      ],
+      "pages": 1
+    },
+    {
+      "name": "COFFEE",
+      "aliases": [
+        "커피"
+      ],
+      "pages": 1
+    },
+    {
+      "name": "NON COFFEE",
+      "aliases": [
+        "논커피",
+        "음료",
+        "라떼"
+      ],
+      "pages": 1
+    }
+  ],
+  "page_buttons": {
+    "next": "다음",
+    "prev": "이전"
+  },
+  "menus": [
+    {
+      "name": "비닐봉투",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "비닐봉투"
+      ],
+      "price": 50,
+      "aliases": [
+        "봉투"
+      ]
+    },
+    {
+      "name": "유부비건김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "유부비건김밥"
+      ],
+      "price": 3800
+    },
+    {
+      "name": "이화김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "이화김밥"
+      ],
+      "price": 4000
+    },
+    {
+      "name": "치즈김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "치즈김밥"
+      ],
+      "price": 4500
+    },
+    {
+      "name": "참치김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "참치김밥"
+      ],
+      "price": 4900
+    },
+    {
+      "name": "진미채김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "진미채김밥"
+      ],
+      "price": 5200
+    },
+    {
+      "name": "스팸김밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "스팸김밥"
+      ],
+      "price": 5300
+    },
+    {
+      "name": "스팸주먹밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "스팸주먹밥"
+      ],
+      "price": 3300,
+      "aliases": [
+        "주먹밥"
+      ]
+    },
+    {
+      "name": "불닭치즈주먹밥",
+      "category": "이화김밥",
+      "template": "food",
+      "buttons": [
+        "불닭치즈주먹밥"
+      ],
+      "price": 3600
+    },
+    {
+      "name": "배꽃마들렌플레인",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "배꽃마들렌플레인"
+      ],
+      "price": 1700,
+      "aliases": [
+        "마들렌 플레인"
+      ]
+    },
+    {
+      "name": "배꽃마들렌말차",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "배꽃마들렌말차"
+      ],
+      "price": 1700,
+      "aliases": [
+        "마들렌 말차"
+      ]
+    },
+    {
+      "name": "배꽃마들렌초코",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "배꽃마들렌초코"
+      ],
+      "price": 1700,
+      "aliases": [
+        "마들렌 초코"
+      ]
+    },
+    {
+      "name": "카스테라플레인",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "카스테라플레인"
+      ],
+      "price": 3000,
+      "aliases": [
+        "카스테라"
+      ]
+    },
+    {
+      "name": "까눌레플레인",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "까눌레플레인"
+      ],
+      "price": 2500
+    },
+    {
+      "name": "까눌레말차",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "까눌레말차"
+      ],
+      "price": 2500
+    },
+    {
+      "name": "까눌레초코",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "까눌레초코"
+      ],
+      "price": 2500
+    },
+    {
+      "name": "치즈브라우니",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "치즈브라우니"
+      ],
+      "price": 3000,
+      "aliases": [
+        "브라우니"
+      ]
+    },
+    {
+      "name": "배꽃과자치즈S",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "배꽃과자치즈S"
+      ],
+      "price": 2300
+    },
+    {
+      "name": "배꽃과자초코S",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "배꽃과자초코S"
+      ],
+      "price": 2300
+    },
+    {
+      "name": "스콘플레인",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "스콘플레인"
+      ],
+      "price": 2700
+    },
+    {
+      "name": "스콘얼그레이",
+      "category": "이화과자",
+      "template": "food",
+      "buttons": [
+        "스콘얼그레이"
+      ],
+      "price": 3000
+    },
+    {
+      "name": "치즈브라우니(아이스)아메리카노세트",
+      "category": "세트",
+      "template": "set",
+      "buttons": [
+        "치즈브라우니(아이스)아메리카노세트"
+      ],
+      "price": 4900,
+      "aliases": [
+        "브라우니 아이스 세트"
+      ],
+      "note": "온도 표시가 이름 중간에 있어 온도별로 따로 둠."
+    },
+    {
+      "name": "치즈브라우니(핫)아메리카노세트",
+      "category": "세트",
+      "template": "set",
+      "buttons": [
+        "치즈브라우니(핫)아메리카노세트"
+      ],
+      "price": 4400,
+      "aliases": [
+        "브라우니 핫 세트"
+      ],
+      "note": "온도 표시가 이름 중간에 있어 온도별로 따로 둠"
+    },
+    {
+      "name": "에스프레소",
+      "category": "COFFEE",
+      "template": "espresso",
+      "buttons": [
+        "(핫) 에스프레소"
+      ],
+      "price": 1800
+    },
+    {
+      "name": "아메리카노",
+      "category": "COFFEE",
+      "template": "coffee",
+      "buttons": [
+        "(핫) 아메리카노",
+        "(아) 아메리카노"
+      ],
+      "price": {
+        "핫": 1900,
+        "아": 2400
+      },
+      "aliases": [
+        "아아",
+        "뜨아"
+      ]
+    },
+    {
+      "name": "아이스티노",
+      "category": "COFFEE",
+      "template": "coffee",
+      "buttons": [
+        "(아) 아이스티노"
+      ],
+      "price": 3200,
+      "note": "이름이 '아이스'로 시작함 (온도 단어로 떼면 안 됨)"
+    },
+    {
+      "name": "카페라떼",
+      "category": "COFFEE",
+      "template": "latte",
+      "buttons": [
+        "(핫) 카페라떼",
+        "(아) 카페라떼"
+      ],
+      "price": 3700,
+      "aliases": [
+        "라떼"
+      ]
+    },
+    {
+      "name": "바닐라카페라떼",
+      "category": "COFFEE",
+      "template": "latte",
+      "buttons": [
+        "(핫) 바닐라카페라떼",
+        "(아) 바닐라카페라떼"
+      ],
+      "price": 4700,
+      "aliases": [
+        "바닐라라떼"
+      ]
+    },
+    {
+      "name": "초코라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(핫) 초코라떼",
+        "(아) 초코라떼"
+      ],
+      "price": 3000,
+      "aliases": [
+        "초코"
+      ]
+    },
+    {
+      "name": "녹차라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(핫) 녹차라떼",
+        "(아) 녹차라떼"
+      ],
+      "price": 3700,
+      "aliases": [
+        "녹차"
+      ]
+    },
+    {
+      "name": "홍차라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(핫) 홍차라떼",
+        "(아) 홍차라떼"
+      ],
+      "price": 4000
+    },
+    {
+      "name": "오곡라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(아) 오곡라떼"
+      ],
+      "price": 3000
+    },
+    {
+      "name": "생바나나라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(아) 생바나나라떼"
+      ],
+      "price": 4000,
+      "aliases": [
+        "바나나라떼"
+      ]
+    },
+    {
+      "name": "고구마라떼",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(핫) 고구마라떼",
+        "(아) 고구마라떼"
+      ],
+      "price": 4000
+    },
+    {
+      "name": "밀크티",
+      "category": "NON COFFEE",
+      "template": "noncoffee",
+      "buttons": [
+        "(핫) 밀크티",
+        "(아) 밀크티"
+      ],
+      "price": 2900
+    }
+  ],
+  "option_groups": {
+    "cup": {
+      "label": "컵선택",
+      "required": true,
+      "multi": false,
+      "choices": [
+        {
+          "name": "텀블러",
+          "price": -200
+        },
+        {
+          "name": "선택안함",
+          "price": 0
+        }
+      ]
+    },
+    "bean": {
+      "label": "원두선택",
+      "required": true,
+      "multi": false,
+      "choices": [
+        {
+          "name": "다크나이트-원두",
+          "price": 0
+        },
+        {
+          "name": "어라운드다운-원두",
+          "price": 0
+        }
+      ]
+    },
+    "shot": {
+      "label": "샷추가",
+      "required": false,
+      "multi": false,
+      "choices": [
+        {
+          "name": "다크 샷추가",
+          "price": 500
+        },
+        {
+          "name": "어라 샷추가",
+          "price": 500
+        },
+        {
+          "name": "다크 샷추가 2번",
+          "price": 1000
+        },
+        {
+          "name": "어라 샷추가 2번",
+          "price": 1000
+        }
+      ]
+    },
+    "soy": {
+      "label": "두유변경",
+      "required": false,
+      "multi": false,
+      "choices": [
+        {
+          "name": "두유변경",
+          "price": 300
+        }
+      ]
+    },
+    "strength": {
+      "label": "커피농도",
+      "required": false,
+      "multi": false,
+      "choices": [
+        {
+          "name": "커피 연하게",
+          "price": 0
+        }
+      ]
+    }
+  },
+  "templates": {
+    "coffee": {
+      "popup": "커피·세트 팝업",
+      "groups": [
+        "cup",
+        "bean",
+        "shot",
+        "strength"
+      ]
+    },
+    "set": {
+      "popup": "커피·세트 팝업",
+      "groups": [
+        "cup",
+        "bean",
+        "shot",
+        "strength"
+      ]
+    },
+    "espresso": {
+      "popup": "에스프레소 팝업",
+      "groups": [
+        "cup",
+        "bean",
+        "shot"
+      ]
+    },
+    "latte": {
+      "popup": "라떼 팝업",
+      "groups": [
+        "cup",
+        "bean",
+        "shot",
+        "soy",
+        "strength"
+      ]
+    },
+    "noncoffee": {
+      "popup": "논커피 팝업",
+      "groups": [
+        "cup",
+        "shot",
+        "soy"
+      ]
+    },
+    "food": {
+      "popup": null,
+      "groups": [],
+      "desc": "옵션 팝업 없이 바로 장바구니에 담김"
+    }
+  },
+  "screen_text": {
+    "option_button": "옵션 버튼은 두 줄: 이름 + 가격 변화 (예: '텀블러' / '-200'). 가격 줄은 메뉴 사전 비교에서 뺌",
+    "group_label": "묶음 이름은 '<label>(필수)' 또는 '<label>(선택)' (예: '컵선택(필수)')",
+    "cart_row": "장바구니 한 줄: '×' / 메뉴 버튼 글자 / '-' / 수량 / '+' / 가격 (예: × 참치김밥 - 1 + 4,900)",
+    "sold_out": "품절 메뉴 카드는 회색 사각형에 '일시품절', 아래 이름·가격이 흐리게 표시됨"
+  },
+  "flow_screens": [
+    {
+      "screen": "시작 화면",
+      "buttons": [
+        "주문하시려면 화면을 터치해주세요",
+        "한국어",
+        "English"
+      ]
+    },
+    {
+      "screen": "안내 팝업",
+      "text": "비닐봉투 또는 캐리어가 필요하시면 추가로 주문해주세요.",
+      "buttons": [
+        "확인"
+      ]
+    },
+    {
+      "screen": "메뉴 화면",
+      "buttons": [
+        "카테고리 탭 5개",
+        ">",
+        "◀ 이전",
+        "다음 ▶",
+        "전체 취소",
+        "결제",
+        "메인"
+      ]
+    },
+    {
+      "screen": "옵션 팝업",
+      "buttons": [
+        "×",
+        "확대",
+        "선택완료"
+      ]
+    },
+    {
+      "screen": "주문 내역 확인",
+      "buttons": [
+        "취소",
+        "결제하기"
+      ]
+    },
+    {
+      "screen": "결제수단 선택",
+      "buttons": [
+        "신용카드 / 삼성페이 / 애플페이",
+        "카카오페이",
+        "네이버페이",
+        "알리/위챗페이",
+        "모바일상품권",
+        "선불카드",
+        "외상카드",
+        "취소"
+      ]
+    },
+    {
+      "screen": "카드·바코드·QR 결제",
+      "buttons": [
+        "취소"
+      ]
+    },
+    {
+      "screen": "결제 완료"
+    }
+  ]
+}
