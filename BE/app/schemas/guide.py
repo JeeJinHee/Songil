@@ -12,17 +12,13 @@ class NextTargetResult(str, enum.Enum):
     NOT_FOUND = "NOT_FOUND"
     DONE = "DONE"
 
-class BBox(CamelModel):
-    x: float = Field(ge=0, le=1)
-    y: float = Field(ge=0, le=1)
-    w: float = Field(ge=0, le=1)
-    h: float = Field(ge=0, le=1)
 class Button(CamelModel):
     button_id: str
     text: str
+    type: str | None = None         # "tab"/"menu"/"etc"/없음
     group: str | None = None
     sold_out: bool = False
-    bbox: BBox | None = None
+    bbox: list[float] | None = None         # [x1, y1, x2, y2]
 
 class CartRow(CamelModel):
     texts: list[str]
@@ -46,7 +42,8 @@ class NextTargetResponse(CamelModel):
     choices: list[str] | None = None
     current_step: CurrentStep
     message: str
-
+    source: str | None=None
+    reason: str | None=None
 
 class SelectionResultRequest(CamelModel):
     target_button_id: str

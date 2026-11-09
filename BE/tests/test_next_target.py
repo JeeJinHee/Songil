@@ -12,8 +12,8 @@ POPUP = [
     {"buttonId": "ok", "text": "선택완료"},
 ]
 TABS = [
-    {"buttonId": "t1", "text": "이화김밥", "group": "카테고리"},
-    {"buttonId": "t2", "text": "COFFEE", "group": "카테고리"},
+    {"buttonId": "t1", "text": "이화김밥", "type": "tab"},
+    {"buttonId": "t2", "text": "COFFEE", "type": "tab"},
 ]
 
 # 목표를 확정한 세션을 만들고 next-target 주소를 돌려줌
@@ -141,7 +141,7 @@ def test_all_tabs_seen(client):
     body = client.post(url, json=screen(3, TABS)).json()
     assert body["result"] == "NOT_FOUND"
 
-# 다음 ▶를 3번 넘기면 탭으로 넘어감
+# 다음을 3번 넘기면 탭으로 넘어감
 def test_page_limit_then_tab(client):
     url = confirmed_url(client, "카페라떼")
     for seq in range(1, 4):
@@ -151,4 +151,18 @@ def test_page_limit_then_tab(client):
     assert body["currentStep"] == "CATEGORY_SELECT"
     assert body["target"]["text"] == "이화김밥"
 
-    
+def test_message_reads_temperature(client):
+    url = confirmed_url(client, "아이스 아메리카노")
+    body = client.post(url, json=screen(1, MENU)).json()
+    assert body["target"]["text"] == "(아) 아메리카노"
+    assert body["message"] == "아이스 아메리카노 버튼을 누르세요."
+
+def test_source_rule_and_fallback(client):
+    url = confirmed_url(client, "아이스 아메리카노")
+    body = client.post(url, json=screen(1, MENU)).json()
+    assert body["source"] == "rule"
+
+    url = confirmed_url(client, "카페라떼")
+    body = client.post(url, json=screen(1, TABS)).json()
+    assert body["source"] == "fallback"
+    assert body["reason"]

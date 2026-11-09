@@ -26,13 +26,23 @@ def temperature_of(value: str) -> str | None:
         return "따뜻한"
     return None
 
+SPOKEN_MARKS = {
+    "(아이스)": "아이스", "(아)": "아이스", "(ICE)": "아이스",
+    "(따뜻한)": "따뜻한", "(핫)": "따뜻한", "(HOT)": "따뜻한",
+}
+# 읽어 줄 때만 온도 표시를 말로 바꾸기: "(아) 아메리카노" → "아이스 아메리카노"
+def spoken(text: str) -> str:
+    for mark, word in SPOKEN_MARKS.items():
+        if text.startswith(mark):
+            return f"{word} {text[len(mark):].strip()}"
+    return text
+
 
 def group_name(group: str) -> str:
     return re.sub(r"\(.*?\)", "", group).strip()
 
 def is_required(group: str) -> bool:
     return "필수" in group
-
 
 def match_choice(answer: str, choices: list[str]) -> str | None:
     words = [w for w in answer.split() if len(w) >= 2]
