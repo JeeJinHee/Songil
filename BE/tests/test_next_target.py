@@ -46,13 +46,11 @@ def test_answer_picks_temperature(client):
     assert body["result"] == "TARGET"
     assert body["target"]["text"] == "(아) 아메리카노"
 
-
 def test_goal_temperature_skips_question(client):
     url = confirmed_url(client, "따뜻한 아메리카노")
     body = client.post(url, json=screen(1, MENU)).json()
     assert body["result"] == "TARGET"
     assert body["target"]["buttonId"] == "m2"
-
 
 def test_sold_out(client):
     url = confirmed_url(client, "아이스 아메리카노")
@@ -60,19 +58,16 @@ def test_sold_out(client):
     body = client.post(url, json=screen(1, buttons)).json()
     assert body["result"] == "SOLD_OUT"
 
-
 def test_next_page_when_menu_missing(client):
     url = confirmed_url(client, "카페라떼")
     body = client.post(url, json=screen(1, MENU)).json()
     assert body["result"] == "TARGET"
     assert body["target"]["text"] == "다음 ▶"
 
-
 def test_not_found_without_next_page(client):
     url = confirmed_url(client, "카페라떼")
     body = client.post(url, json=screen(1, MENU[:2])).json()
     assert body["result"] == "NOT_FOUND"
-
 
 def test_option_popup_flow(client):
     url = confirmed_url(client)
@@ -85,7 +80,6 @@ def test_option_popup_flow(client):
 
     body = client.post(url, json=screen(3, POPUP)).json()
     assert body["target"]["text"] == "선택완료"
-
 
 def test_plus_then_done(client):
     url = confirmed_url(client)
@@ -103,18 +97,15 @@ def test_unknown_session(client):
     url = f"/api/sessions/{uuid.uuid4()}/next-target"
     assert client.post(url, json=screen(1, MENU)).status_code == 404
 
-
 def test_goal_not_confirmed(client):
     session_id = client.post("/api/sessions").json()["sessionId"]
     url = f"/api/sessions/{session_id}/next-target"
     assert client.post(url, json=screen(1, MENU)).status_code == 409
 
-
 def test_stale_screen(client):
     url = confirmed_url(client)
     client.post(url, json=screen(5, MENU))
     assert client.post(url, json=screen(3, MENU)).status_code == 409
-
 
 def test_ended_session(client):
     url = confirmed_url(client)
@@ -125,7 +116,7 @@ def test_ended_session(client):
 
 # 메뉴도 다음 ▶도 없으면 안 본 탭을 차례로 안내
 def test_tabs_in_order(client):
-    url = confirmed_url(client, "카페라떼")
+    url = confirmed_url(client, "딸기스무디")
     first = client.post(url, json=screen(1, TABS)).json()
     assert first["target"]["text"] == "이화김밥"
     assert first["currentStep"] == "CATEGORY_SELECT"
@@ -135,7 +126,7 @@ def test_tabs_in_order(client):
 
 # 탭을 다 봤는데도 없으면 NOT_FOUND
 def test_all_tabs_seen(client):
-    url = confirmed_url(client, "카페라떼")
+    url = confirmed_url(client, "딸기스무디")
     client.post(url, json=screen(1, TABS))
     client.post(url, json=screen(2, TABS))
     body = client.post(url, json=screen(3, TABS)).json()
@@ -143,7 +134,7 @@ def test_all_tabs_seen(client):
 
 # 다음을 3번 넘기면 탭으로 넘어감
 def test_page_limit_then_tab(client):
-    url = confirmed_url(client, "카페라떼")
+    url = confirmed_url(client, "딸기스무디")
     for seq in range(1, 4):
         body = client.post(url, json=screen(seq, MENU + TABS)).json()
         assert body["currentStep"] == "PAGE_NEXT"
@@ -166,3 +157,20 @@ def test_source_rule_and_fallback(client):
     body = client.post(url, json=screen(1, TABS)).json()
     assert body["source"] == "fallback"
     assert body["reason"]
+
+# 사전에 있는 메뉴면 그 카테고리 탭부터
+def test_dictionary_tab_first(client):
+    url = confirmed_url(client, "카페라떼")
+    body = client.post(url, json=screen(1, TABS)).json()
+    assert body["target"]["text"] == "COFFEE"
+    assert body["currentStep"] == "CATEGORY_SELECT"
+    assert "COFFEE" in body["reason"]
+
+# 사전에서 1페이지인 탭이면 다음 ▶ 없이 다른 탭으로
+def test_dictionary_pages_limit(client):
+    url = confirmed_url(client, "카페라떼")
+    client.post(url, json=screen(1, TABS))
+    next_btn = [{"buttonId": "n1", "text": "다음 ▶"}]
+    body = client.post(url, json=screen(2, TABS + next_btn)).json()
+    assert body["currentStep"] == "CATEGORY_SELECT"
+    assert body["target"]["text"] == "이화김밥"
