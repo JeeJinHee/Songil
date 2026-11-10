@@ -1,0 +1,12 @@
+# AI 프로토타입: 실행하면 생기는 파일들 (Git에 올리지 않음)
+__pycache__/
+*.pyc
+out/
+tts_cache/
+tip_wrong/
+captures/
+*.wav
+
+# 외부 모델 가중치 (README의 다운로드 안내 참고)
+*.h5
+weights/
